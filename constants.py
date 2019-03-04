@@ -2,7 +2,10 @@ derivative_time_id = "dev-time"
 integral_time_id = "int-time"
 conroller_gain_id = "prop-time"
 setpoint_id = "PID-setpoint"
+
 temperature_display_id = "omega-display"
+duty_cycle_id = "duty-cycle"
+
 temperature_store_id = "temperature-store"
 command_string = "command-string"
 
@@ -15,8 +18,7 @@ download_link_id = "download-link"
 csv_string_id = "raw-data"
 
 graph_data_id= "graph-data"
-data_set_id = "data-set"
-duty_cycle_id = "duty-cycle"
+
 graph_interval_id = "graph-interval"
 refresh_rate_id = "refresh-rate"
 dead_time_switch_id = "dead-time-switch"
