@@ -15,6 +15,8 @@ import plotly.graph_objs as go
 import scipy.integrate as integrate
 from dash.dependencies import State, Input, Output
 from constants import *
+import temperature_graph
+import control_panel
 
 start_time = time.time()
 
@@ -60,79 +62,7 @@ app.layout = html.Div(
             [
                 html.Div(
                     [
-                        html.Div(
-                            [
-                                html.Div(
-                                    [
-                                        html.H4(
-                                            "Temperature vs. Time Graph",
-                                            className=" three columns",
-                                            style={
-                                                "textAlign": "center",
-                                                "width": "41%",
-                                            },
-                                        ),
-                                    ],
-                                    className="row",
-                                    style={
-                                        "marginTop": "1%",
-                                        "marginBottom": "2%",
-                                        "justify-content": "center",
-                                        "align-items": "center",
-                                        "display": "flex",
-                                        "position": "relative",
-                                    },
-                                ),
-                                dcc.Graph(
-                                    id=graph_data_id,
-                                    style={"height": "254px",
-                                           "marginBottom": "1%"},
-                                    figure={
-                                        "data": [
-                                            go.Scatter(
-                                                x=[],
-                                                y=[],
-                                                mode="lines",
-                                                marker={"size": 6},
-                                                name="Temperature (C°)",
-                                            ),
-                                            go.Scatter(
-                                                x=[],
-                                                y=[],
-                                                mode="lines",
-                                                marker={"size": 6},
-                                                name="Set Point (°C)",
-                                            ),
-                                            go.Scatter(
-                                                x=[],
-                                                y=[],
-                                                mode="lines",
-                                                marker={"size": 6},
-                                                name="Duty Cycle",
-                                                visible=False
-                                            ),
-                                        ],
-                                        "layout": go.Layout(
-                                            xaxis={
-                                                "title": "Time (s)",
-                                                "autorange": True,
-                                            },
-                                            yaxis={
-                                                "title": "Temperature (°C)", "autorange": True},
-                                            margin={"l": 70, "b": 100,
-                                                    "t": 0, "r": 25},
-                                        ),
-                                    },
-                                ),
-                            ],
-                            className="twelve columns",
-                            style={
-                                "border-radius": "5px",
-                                "border-width": "5px",
-                                "border": "1px solid rgb(216, 216, 216)",
-                                "marginBottom": "2%",
-                            },
-                        )
+                        temperature_graph.layout
                     ],
                     className="row",
                     style={"marginTop": "3%"},
@@ -141,151 +71,8 @@ app.layout = html.Div(
                     [
                         html.Div(
                             [
-                                html.H3("Control Panel", style={
-                                        "textAlign": "center", }),
-                                html.Div(
-                                    [
-                                        html.Div(
-                                            [
-                                                html.Div(
-                                                    [
-                                                        daq.StopButton(
-                                                            id=start_button_id,
-                                                            buttonText="Start",
-                                                            style={
-                                                                "display": "flex",
-                                                                "justify-content": "center",
-                                                                "align-items": "center",
-                                                                "paddingBottom": "25%",
-                                                            },
-                                                            n_clicks=0,
-                                                        ),
-                                                        daq.StopButton(
-                                                            id=stop_button_id,
-                                                            buttonText="Stop",
-                                                            style={
-                                                                "display": "flex",
-                                                                "justify-content": "center",
-                                                                "align-items": "center",
-                                                                "paddingBottom": "25%",
-                                                            },
-                                                            n_clicks=0,
-                                                        ),
-                                                        daq.StopButton(
-                                                            id=reset_button_id,
-                                                            buttonText="Reset",
-                                                            style={
-                                                                "display": "flex",
-                                                                "justify-content": "center",
-                                                                "align-items": "center",
-                                                                "paddingBottom": "25%",
-                                                            },
-                                                            n_clicks=0,
-                                                        ),
-                                                    ],
-                                                    className="two columns",
-                                                    style={"marginLeft": "5%"},
-                                                ),
-                                                daq.Knob(
-                                                    id=refresh_rate_id,
-                                                    label="Refresh Rate (s)",
-                                                    labelPosition="bottom",
-                                                    size=65,
-                                                    value=1,
-                                                    scale={"interval": 1},
-                                                    color="#FF5E5E",
-                                                    max=10,
-                                                    className="six columns",
-                                                    style={
-                                                        "display": "flex",
-                                                        "justify-content": "center",
-                                                        "align-items": "center",
-                                                        "marginLeft": "17%",
-                                                        "marginTop": "-11%",
-                                                    },
-                                                ),
-                                            ],
-                                            className="row",
-                                        ),
-                                                html.Div(
-                                                    [
-                                                        html.Div(
-                                                            [
-                                                                daq.NumericInput(
-                                                                    id=setpoint_id,
-                                                                    label="PID Setpoint (°C)",
-                                                                    value=26,
-                                                                    max=35,
-                                                                    min=25,
-                                                                    size=75,
-                                                                    labelPosition="bottom",
-                                                                    style={
-                                                                        "paddingBottom": "5%"
-                                                                    },
-                                                                ),
-                                                                daq.NumericInput(
-                                                                    id=derivative_time_id,
-                                                                    label="Derivative Time",
-                                                                    value=0.1,
-                                                                    max=1,
-                                                                    min=0,
-                                                                    size=75,
-                                                                    labelPosition="bottom",
-                                                                    style={
-                                                                        "paddingBottom": "21%"
-                                                                    },
-                                                                    disabled=False,
-                                                                )
-                                                            ],
-                                                            className="five columns",
-                                                        ),
-                                                        html.Div(
-                                                            [
-                                                                daq.NumericInput(
-                                                                    id=conroller_gain_id,
-                                                                    label="Controller Gain",
-                                                                    value=0.44,
-                                                                    max=5,
-                                                                    min=0,
-                                                                    size=75,
-                                                                    labelPosition="bottom",
-                                                                    style={
-                                                                        "paddingBottom": "5%"
-                                                                    },
-                                                                    disabled=False,
-                                                                ),
-                                                                daq.NumericInput(
-                                                                    id=integral_time_id,
-                                                                    label="Integral Time",
-                                                                    value=35.00,
-                                                                    max=300,
-                                                                    min=0,
-                                                                    size=75,
-                                                                    labelPosition="bottom",
-                                                                    style={
-                                                                        "paddingBottom": "6%"
-                                                                    },
-                                                                    disabled=False,
-                                                                ),
-                                                                daq.BooleanSwitch(
-                                                                    id=dead_time_switch_id,
-                                                                    label="Dead Time",
-                                                                    labelPosition="bottom",
-                                                                    on=False,
-                                                                    style={
-                                                                        "paddingTop": "8.5%",
-                                                                        "paddingBottom": "13%",
-                                                                    },
-                                                                ),
-                                                            ]
-                                                        ),
-                                                    ],
-                                                    className="row",
-                                                    style={
-                                                        "marginLeft": "12%",
-                                                        "marginBottom": "9%",
-                                                    },
-                                                )])],
+                                control_panel.layout
+                                ],
                             className="eight columns",
                             style={
                                 "border-radius": "5px",
