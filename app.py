@@ -1,3 +1,5 @@
+import arduino_helper
+from pyfirmata import Arduino, util, STRING_DATA
 import time
 import random
 import urllib.parse
@@ -15,10 +17,7 @@ from dash.dependencies import State, Input, Output
 from constants import *
 
 start_time = time.time()
-import time
-import numpy as np
 
-from pyfirmata import Arduino, util, STRING_DATA
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -26,7 +25,6 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 app.config.suppress_callback_exceptions = True
 connected = False
-import arduino_helper
 
 current_DC = 0.0
 
@@ -47,13 +45,13 @@ header = html.Div(
 )
 if not connected:
     header = html.Div(
-    id="container",
-    style={"background-color": "#119DFF"},
-    children=[
-        html.H2("Warning - not connected"),
-    ],
-    className="banner",
-)
+        id="container",
+        style={"background-color": "#119DFF"},
+        children=[
+            html.H2("Warning - not connected"),
+        ],
+        className="banner",
+    )
 
 app.layout = html.Div(
     [
@@ -87,7 +85,8 @@ app.layout = html.Div(
                                 ),
                                 dcc.Graph(
                                     id=graph_data_id,
-                                    style={"height": "254px", "marginBottom": "1%"},
+                                    style={"height": "254px",
+                                           "marginBottom": "1%"},
                                     figure={
                                         "data": [
                                             go.Scatter(
@@ -118,8 +117,10 @@ app.layout = html.Div(
                                                 "title": "Time (s)",
                                                 "autorange": True,
                                             },
-                                            yaxis={"title": "Temperature (°C)","autorange": True},
-                                            margin={"l": 70, "b": 100, "t": 0, "r": 25},
+                                            yaxis={
+                                                "title": "Temperature (°C)", "autorange": True},
+                                            margin={"l": 70, "b": 100,
+                                                    "t": 0, "r": 25},
                                         ),
                                     },
                                 ),
@@ -140,9 +141,8 @@ app.layout = html.Div(
                     [
                         html.Div(
                             [
-                                html.H3(
-                                    "Control Panel", 
-                                    style={"textAlign": "center",}),
+                                html.H3("Control Panel", style={
+                                        "textAlign": "center", }),
                                 html.Div(
                                     [
                                         html.Div(
@@ -178,13 +178,13 @@ app.layout = html.Div(
                                                                 "display": "flex",
                                                                 "justify-content": "center",
                                                                 "align-items": "center",
+                                                                "paddingBottom": "25%",
                                                             },
                                                             n_clicks=0,
-                                                            className="three columns",
                                                         ),
                                                     ],
-                                                    className="three columns",
-                                                    style={"marginLeft": "13%"},
+                                                    className="two columns",
+                                                    style={"marginLeft": "5%"},
                                                 ),
                                                 daq.Knob(
                                                     id=refresh_rate_id,
@@ -206,11 +206,87 @@ app.layout = html.Div(
                                                 ),
                                             ],
                                             className="row",
-                                        )
-                                    ]
-                                ),
-                            ],
-                            className="four columns",
+                                        ),
+                                                html.Div(
+                                                    [
+                                                        html.Div(
+                                                            [
+                                                                daq.NumericInput(
+                                                                    id=setpoint_id,
+                                                                    label="PID Setpoint (°C)",
+                                                                    value=26,
+                                                                    max=35,
+                                                                    min=25,
+                                                                    size=75,
+                                                                    labelPosition="bottom",
+                                                                    style={
+                                                                        "paddingBottom": "5%"
+                                                                    },
+                                                                ),
+                                                                daq.NumericInput(
+                                                                    id=derivative_time_id,
+                                                                    label="Derivative Time",
+                                                                    value=0.1,
+                                                                    max=1,
+                                                                    min=0,
+                                                                    size=75,
+                                                                    labelPosition="bottom",
+                                                                    style={
+                                                                        "paddingBottom": "21%"
+                                                                    },
+                                                                    disabled=False,
+                                                                )
+                                                            ],
+                                                            className="five columns",
+                                                        ),
+                                                        html.Div(
+                                                            [
+                                                                daq.NumericInput(
+                                                                    id=conroller_gain_id,
+                                                                    label="Controller Gain",
+                                                                    value=0.44,
+                                                                    max=5,
+                                                                    min=0,
+                                                                    size=75,
+                                                                    labelPosition="bottom",
+                                                                    style={
+                                                                        "paddingBottom": "5%"
+                                                                    },
+                                                                    disabled=False,
+                                                                ),
+                                                                daq.NumericInput(
+                                                                    id=integral_time_id,
+                                                                    label="Integral Time",
+                                                                    value=35.00,
+                                                                    max=300,
+                                                                    min=0,
+                                                                    size=75,
+                                                                    labelPosition="bottom",
+                                                                    style={
+                                                                        "paddingBottom": "6%"
+                                                                    },
+                                                                    disabled=False,
+                                                                ),
+                                                                daq.BooleanSwitch(
+                                                                    id=dead_time_switch_id,
+                                                                    label="Dead Time",
+                                                                    labelPosition="bottom",
+                                                                    on=False,
+                                                                    style={
+                                                                        "paddingTop": "8.5%",
+                                                                        "paddingBottom": "13%",
+                                                                    },
+                                                                ),
+                                                            ]
+                                                        ),
+                                                    ],
+                                                    className="row",
+                                                    style={
+                                                        "marginLeft": "12%",
+                                                        "marginBottom": "9%",
+                                                    },
+                                                )])],
+                            className="eight columns",
                             style={
                                 "border-radius": "5px",
                                 "border-width": "5px",
@@ -220,110 +296,8 @@ app.layout = html.Div(
                         ),
                         html.Div(
                             [
-                                html.H3("PID Control", style={"textAlign": "center"}),
-                                html.Div(
-                                    id="manual-box",
-                                    children=[
-                                        html.Div(
-                                            [
-                                                html.Div(
-                                                    [             
-                                                   daq.NumericInput(
-                                                            id=setpoint_id,
-                                                            label="PID Setpoint (°C)",
-                                                            value=26,
-                                                            max=35,
-                                                            min=25,
-                                                            size=75,
-                                                            labelPosition="bottom",
-                                                            style={
-                                                                "paddingBottom": "5%"
-                                                            },
-                                                        ),
-                                                        daq.NumericInput(
-                                                            id= derivative_time_id,
-                                                            label="Derivative Time",
-                                                            value=0.1,
-                                                            max=1,
-                                                            min=0,
-                                                            size=75,
-                                                            labelPosition="bottom",
-                                                            style={
-                                                                "paddingBottom": "21%"
-                                                            },
-                                                            disabled=False,
-                                                        )
-                                                    ],
-                                                    className="five columns",
-                                                ),
-                                                html.Div(
-                                                    [
-                                                        daq.NumericInput(
-                                                            id=conroller_gain_id,
-                                                            label="Controller Gain",
-                                                            value=0.44,
-                                                            max=5,
-                                                            min=0,
-                                                            size=75,
-                                                            labelPosition="bottom",
-                                                            style={
-                                                                "paddingBottom": "5%"
-                                                            },
-                                                            disabled=False,
-                                                        ),
-                                                        daq.NumericInput(
-                                                            id=integral_time_id,
-                                                            label="Integral Time",
-                                                            value=35.00,
-                                                            max=300,
-                                                            min=0,
-                                                            size=75,
-                                                            labelPosition="bottom",
-                                                            style={
-                                                                "paddingBottom": "6%"
-                                                            },
-                                                            disabled=False,
-                                                        ),
-                                                        daq.BooleanSwitch(
-                                                            id=dead_time_switch_id,
-                                                            label="Dead Time",
-                                                            labelPosition="bottom",
-                                                            on=False,
-                                                            style={
-                                                                "paddingTop": "8.5%",
-                                                                "paddingBottom": "13%",
-                                                            },
-                                                        ),
-                                                    ]
-                                                ),
-                                            ],
-                                            className="row",
-                                            style={
-                                                "marginLeft": "12%",
-                                                "marginBottom": "9%",
-                                            },
-                                        )
-                                    ],
-                                    style={
-                                        "marginTop": "5%",
-                                        "position": "absolute",
-                                        "height": "100%",
-                                        "width": "100%",
-                                    },
-                                ),
-                            ],
-                            className="four columns",
-                            style={
-                                "border-radius": "5px",
-                                "border-width": "5px",
-                                "border": "1px solid rgb(216, 216, 216)",
-                                "position": "relative",
-                                "height": "435px",
-                            },
-                        ),
-                        html.Div(
-                            [
-                                html.H3("Temperature", style={"textAlign": "center"}),
+                                html.H3("Temperature", style={
+                                        "textAlign": "center"}),
                                 html.Div(
                                     [
                                         daq.LEDDisplay(
@@ -365,7 +339,8 @@ app.layout = html.Div(
                                     className="row",
                                     style={"marginBottom": "2%"},
                                 ),
-                                html.H3("Duty Cycle", style={"textAlign": "center"}),
+                                html.H3("Duty Cycle", style={
+                                        "textAlign": "center"}),
                                 html.Div(
                                     [
                                         daq.LEDDisplay(
@@ -440,10 +415,10 @@ app.layout = html.Div(
                     style={"visibility": "hidden"},
                 ),
             ],
-            style={"padding": "0px 30px 0px 30px",},
+            style={"padding": "0px 30px 0px 30px", },
         ),
     ],
-    
+
     style={
         "padding": "0px 10px 0px 10px",
         "marginLeft": "auto",
@@ -455,11 +430,13 @@ app.layout = html.Div(
 )
 
 # LED Control Panel
+
+
 @app.callback(
     Output(temperature_display_id, "value"),
     [Input(graph_interval_id, "n_intervals")],
     [State(temperature_store_id, "children"),
-    State(command_string, "children")],
+     State(command_string, "children")],
 )
 def graph_control(interval, temperature, command):
     if command == "START" or command == "STOP":
@@ -469,8 +446,10 @@ def graph_control(interval, temperature, command):
         return "25.00"
 
 # Buttons
+
+
 @app.callback(
-    Output(start_time_id, "children"), 
+    Output(start_time_id, "children"),
     [Input(start_button_id, "n_clicks")]
 )
 def start_time(start):
@@ -478,14 +457,15 @@ def start_time(start):
 
 
 @app.callback(
-    Output(stop_time_id, "children"), 
+    Output(stop_time_id, "children"),
     [Input(stop_button_id, "n_clicks")]
 )
 def stop_time(stop):
     return time.time()
 
+
 @app.callback(
-    Output(download_link_id, "href"), 
+    Output(download_link_id, "href"),
     [Input(download_button_id, "n_clicks")],
     [State(csv_string_id, "value")]
 )
@@ -494,24 +474,26 @@ def download(clicks, csvString):
 
 
 @app.callback(
-    Output(reset_time_id, "children"), 
+    Output(reset_time_id, "children"),
     [Input(reset_button_id, "n_clicks")]
 )
 def reset_time(reset):
     return time.time()
 
 # Button Control Panel
+
+
 @app.callback(
     Output(command_string, "children"),
     [Input(start_time_id, "children"),
-    Input(stop_time_id, "children"),
-    Input(reset_time_id, "children")]
+     Input(stop_time_id, "children"),
+     Input(reset_time_id, "children")]
 )
 def command_string_button(
-    start_button, 
-    stop_button, 
+    start_button,
+    stop_button,
     reset_button
-    ):
+):
     master_command = {
         "START": start_button,
         "STOP": stop_button,
@@ -522,10 +504,10 @@ def command_string_button(
 
 
 # Rate
-@app.callback( 
+@app.callback(
     Output(graph_interval_id, "interval"),
-    [Input(command_string, "children"), 
-    Input(refresh_rate_id, "value")],
+    [Input(command_string, "children"),
+     Input(refresh_rate_id, "value")],
 )
 def graph_control(command, rate):
     if command == "START":
@@ -535,8 +517,10 @@ def graph_control(command, rate):
         return 2500
 
 # Deadtime
+
+
 @app.callback(
-    Output(derivative_time_id, "value"), 
+    Output(derivative_time_id, "value"),
     [Input(dead_time_switch_id, "on")]
 )
 def dead_time_dev_gain_value(switch):
@@ -544,8 +528,9 @@ def dead_time_dev_gain_value(switch):
         return 0.1
     return 0
 
+
 @app.callback(
-    Output(conroller_gain_id, "value"), 
+    Output(conroller_gain_id, "value"),
     [Input(dead_time_switch_id, "on")]
 )
 def dead_time_dev_gain_value(switch):
@@ -553,8 +538,9 @@ def dead_time_dev_gain_value(switch):
         return 0.26
     return 0.44
 
+
 @app.callback(
-    Output(integral_time_id, "value"), 
+    Output(integral_time_id, "value"),
     [Input(dead_time_switch_id, "on")]
 )
 def dead_time_dev_gain_value(switch):
@@ -562,16 +548,18 @@ def dead_time_dev_gain_value(switch):
         return 100
     return 35
 
+
 @app.callback(
-    Output(derivative_time_id, "disabled"), 
+    Output(derivative_time_id, "disabled"),
     [Input(dead_time_switch_id, "on")]
 )
 def dead_time_dev_gain_value(switch):
     derivative_time_disabled = not switch
     return derivative_time_disabled
 
+
 @app.callback(
-    Output(setpoint_id, "max"), 
+    Output(setpoint_id, "max"),
     [Input(dead_time_switch_id, "on")]
 )
 def dead_time(switch):
@@ -581,26 +569,29 @@ def dead_time(switch):
         return 42
 
 # Temperature Store
+
+
 @app.callback(
     Output(temperature_store_id, "children"),
-    [Input(command_string, "children"), 
-    Input(graph_interval_id, "n_intervals")],
+    [Input(command_string, "children"),
+     Input(graph_interval_id, "n_intervals")],
 )
-def graph_control(command, rate): 
+def graph_control(command, rate):
     if command == "START":
         return arduino_helper.get_temperature()
+
 
 @app.callback(
     Output(duty_cycle_id, "value"),
     [Input(graph_interval_id, "n_intervals")],
     [State(refresh_rate_id, "value"),
-    State(duty_cycle_id, "value"),
-    State(command_string, "children"),
-    State(setpoint_id, "value"),
-    State(temperature_store_id, "children"),
-    State(derivative_time_id, "value"),
-    State(conroller_gain_id, "value"),
-    State(integral_time_id, "value")]
+     State(duty_cycle_id, "value"),
+     State(command_string, "children"),
+     State(setpoint_id, "value"),
+     State(temperature_store_id, "children"),
+     State(derivative_time_id, "value"),
+     State(conroller_gain_id, "value"),
+     State(integral_time_id, "value")]
 )
 def send_new_dc(interval, rate, current_DC, command, PID_setpoint, temperature, dev_gain, pro_gain, int_gain):
     if command == "START":
@@ -614,7 +605,8 @@ def send_new_dc(interval, rate, current_DC, command, PID_setpoint, temperature, 
         int_gain = float(int_gain)
         pro_gain = float(pro_gain)
         current_DC = float(current_DC)
-        current_DC += pro_gain*(EN_current - EN_previous + (delta_time/int_gain) * EN_current)
+        current_DC += pro_gain * \
+            (EN_current - EN_previous + (delta_time/int_gain) * EN_current)
         if current_DC > 1:
             current_DC = 1
         if current_DC < 0:
@@ -625,6 +617,7 @@ def send_new_dc(interval, rate, current_DC, command, PID_setpoint, temperature, 
     arduino_helper.update_duty_cycle(0)
     return "0.00"
 
+
 @app.callback(
     Output(data_set_id, "children"),
     [Input(temperature_store_id, "children")],
@@ -634,16 +627,17 @@ def data_set(temperature, command):
     if command == "START":
         return arduino_helper.get_temperature()
 
+
 @app.callback(
     Output(csv_string_id, "value"),
     [Input(temperature_store_id, "children")],
     [State(csv_string_id, "value"),
-    State(command_string, "children"),
-    State(duty_cycle_id, "value"),
-    State(setpoint_id, "value"),
-    State(derivative_time_id, "value"),
-    State(conroller_gain_id, "value"),
-    State(integral_time_id, "value")],
+     State(command_string, "children"),
+     State(duty_cycle_id, "value"),
+     State(setpoint_id, "value"),
+     State(derivative_time_id, "value"),
+     State(conroller_gain_id, "value"),
+     State(integral_time_id, "value")],
 )
 def log_to_csv(temperature, data, command, duty_cycle, setpoint, dev_gain, pro_gain, int_gain):
     if not data:
@@ -654,16 +648,17 @@ def log_to_csv(temperature, data, command, duty_cycle, setpoint, dev_gain, pro_g
     new_row = f"{time_now},{temperature},{duty_cycle},{setpoint},{dev_gain},{pro_gain},{int_gain}"
     data += new_row + "\n"
 
+
 @app.callback(
     Output(graph_data_id, "figure"),
     [Input(temperature_store_id, "children")],
     [State(graph_data_id, "figure"),
-    State(command_string, "children"),
-    State(start_time_id, "children"),
-    State(start_button_id, "n_clicks"),
-    State(setpoint_id, "value"),
-    State(data_set_id, "children"),
-    State(duty_cycle_id, "value")],
+     State(command_string, "children"),
+     State(start_time_id, "children"),
+     State(start_button_id, "n_clicks"),
+     State(setpoint_id, "value"),
+     State(data_set_id, "children"),
+     State(duty_cycle_id, "value")],
 )
 def graph_data(temperature, figure, command, start, start_button, PID, data_set, duty_cycle):
     if command == "START":
@@ -690,10 +685,10 @@ def graph_data(temperature, figure, command, start, start_button, PID, data_set,
     return {
         "data": [
             go.Scatter(
-                x=times, 
-                y=temperatures, 
-                mode="lines", 
-                marker={"size": 6}, 
+                x=times,
+                y=temperatures,
+                mode="lines",
+                marker={"size": 6},
                 name="Temperature (°C)"
             ),
             go.Scatter(
@@ -721,6 +716,7 @@ def graph_data(temperature, figure, command, start, start_button, PID, data_set,
             margin={"l": 70, "b": 100, "t": 0, "r": 25},
         ),
     }
+
 
 if __name__ == '__main__':
     app.run_server(debug=False)
