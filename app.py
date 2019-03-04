@@ -19,18 +19,14 @@ import time
 import numpy as np
 
 from pyfirmata import Arduino, util, STRING_DATA
-import helpers
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 app.config.suppress_callback_exceptions = True
-
-portName = 'COM5'
 connected = False
 import arduino_helper
-connected = True
 
 current_DC = 0.0
 
@@ -77,18 +73,6 @@ app.layout = html.Div(
                                                 "textAlign": "center",
                                                 "width": "41%",
                                             },
-                                        ),
-                                        daq.StopButton(
-                                            id=reset_button_id,
-                                            buttonText="Reset",
-                                            style={
-                                                "display": "flex",
-                                                "justify-content": "center",
-                                                "align-items": "center",
-                                                "width": "10%",
-                                            },
-                                            n_clicks=0,
-                                            className="three columns",
                                         ),
                                     ],
                                     className="row",
@@ -172,7 +156,7 @@ app.layout = html.Div(
                                                                 "display": "flex",
                                                                 "justify-content": "center",
                                                                 "align-items": "center",
-                                                                "paddingBottom": "22%",
+                                                                "paddingBottom": "25%",
                                                             },
                                                             n_clicks=0,
                                                         ),
@@ -183,8 +167,20 @@ app.layout = html.Div(
                                                                 "display": "flex",
                                                                 "justify-content": "center",
                                                                 "align-items": "center",
+                                                                "paddingBottom": "25%",
                                                             },
                                                             n_clicks=0,
+                                                        ),
+                                                        daq.StopButton(
+                                                            id=reset_button_id,
+                                                            buttonText="Reset",
+                                                            style={
+                                                                "display": "flex",
+                                                                "justify-content": "center",
+                                                                "align-items": "center",
+                                                            },
+                                                            n_clicks=0,
+                                                            className="three columns",
                                                         ),
                                                     ],
                                                     className="three columns",
