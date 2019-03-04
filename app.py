@@ -29,40 +29,14 @@ app.config.suppress_callback_exceptions = True
 
 portName = 'COM5'
 connected = False
-
-try:
-    arduino = Arduino(portName)  
-    it = util.Iterator(arduino)
-    it.start()
-    start_time = time.time()
-    input_pin = arduino.get_pin('a:0:i')
-    output_pin = arduino.get_pin('d:6:p')
-    switch_pin = arduino.get_pin('d:9:i')
-except Exception as e:
-    print(e)
+import arduino_helper
+connected = True
 
 current_DC = 0.0
 
-def get_temperature():
-    temperature = helpers.calculate_temperature(read_input_pin())
-    return temperature
-def read_input_pin():
-    return read_voltage_fast(input_pin)
-
-def read_voltage_fast(pin):
-    """
-        Returns the voltage of the pin passed in (between 0 and 5 Volts)
-        It takes a single of measurement
-    """
-    return 5.0 * pin.read()
-    
-def update_duty_cycle(DC): 
-    output_pin.write(DC)
-    current_DC = DC
-
 try:
     time.sleep(2)
-    update_duty_cycle(1.0)
+    arduino_helper.update_duty_cycle(1.0)
     connected = True
 except Exception as e:
     print(e)
@@ -618,7 +592,7 @@ def dead_time(switch):
 )
 def graph_control(command, rate): 
     if command == "START":
-        return get_temperature()
+        return arduino_helper.get_temperature()
 
 @app.callback(
     Output(duty_cycle_id, "value"),
@@ -649,10 +623,10 @@ def send_new_dc(interval, rate, current_DC, command, PID_setpoint, temperature, 
             current_DC = 1
         if current_DC < 0:
             current_DC = 0
-        update_duty_cycle(current_DC)
+        arduino_helper.update_duty_cycle(current_DC)
         return "%.2f" % current_DC
 
-    update_duty_cycle(0)
+    arduino_helper.update_duty_cycle(0)
     return "0.00"
 
 @app.callback(
@@ -662,7 +636,7 @@ def send_new_dc(interval, rate, current_DC, command, PID_setpoint, temperature, 
 )
 def data_set(temperature, command):
     if command == "START":
-        return get_temperature()
+        return arduino_helper.get_temperature()
 
 @app.callback(
     Output(csv_string_id, "value"),
