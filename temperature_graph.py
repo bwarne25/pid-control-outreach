@@ -37,7 +37,7 @@ layout = html.Div(
                     go.Scatter(
                         x=[],
                         y=[],
-                        mode="lines",
+                        mode="markers",
                         marker={"size": 6},
                         name="Temperature (C°)",
                     ),
@@ -51,7 +51,7 @@ layout = html.Div(
                     go.Scatter(
                         x=[],
                         y=[],
-                        mode="lines",
+                        mode="markers",
                         marker={"size": 6},
                         name="Duty Cycle",
                         visible=False

@@ -368,22 +368,36 @@ def get_temperature_for_display(interval, temperature, command):
      State(temperature_store_id, "children"),
      State(derivative_time_id, "value"),
      State(conroller_gain_id, "value"),
-     State(integral_time_id, "value")]
+     State(integral_time_id, "value"),
+     State(graph_data_id, "figure")]
 )
-def get_new_dc(interval, rate, current_DC, command, PID_setpoint, temperature, dev_gain, pro_gain, int_gain):
+def get_new_dc(interval, rate, current_DC, command, PID_setpoint, temperature, dev_gain, pro_gain, int_gain, figure):
     if command == "START":
+        try:
+            delta_time = figure["data"][0]["x"][-1] - figure["data"][0]["x"][-2]
+        except:
+            arduino_helper.update_duty_cycle(0)
+            return "0.00"
+
         EN_previous = PID_setpoint - temperature
         EN_current = PID_setpoint - temperature
 
         PID_setpoint = float(PID_setpoint)
         PID_setpoint = str(PID_setpoint)
 
-        delta_time = rate
         int_gain = float(int_gain)
         pro_gain = float(pro_gain)
+        
         current_DC = float(current_DC)
-        current_DC += pro_gain * \
-            (EN_current - EN_previous + (delta_time/int_gain) * EN_current)
+        current_DC += pro_gain * (EN_current - EN_previous + (delta_time/int_gain) * EN_current)
+        dev_gain = float(dev_gain)
+
+        try:
+            dev_adjustment = -pro_gain *dev_gain/delta_time * (figure["data"][0]["y"][-1] - 2 * figure["data"][0]["y"][-2] + figure["data"][0]["y"][-3])
+            current_DC += dev_adjustment
+        except:
+            pass
+
         if current_DC > 1:
             current_DC = 1
         if current_DC < 0:
@@ -452,7 +466,7 @@ def graph_data(temperature, figure, command, start, start_button, PID, duty_cycl
             go.Scatter(
                 x=times,
                 y=temperatures,
-                mode="lines",
+                mode="markers",
                 marker={"size": 6},
                 name="Temperature (°C)"
             ),
@@ -466,7 +480,7 @@ def graph_data(temperature, figure, command, start, start_button, PID, duty_cycl
             go.Scatter(
                 x=times,
                 y=duty_cycles,
-                mode="lines",
+                mode="markers",
                 marker={"size": 6},
                 name="Duty Cycle",
                 visible=False
