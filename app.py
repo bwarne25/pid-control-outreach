@@ -484,4 +484,6 @@ def graph_data(temperature, figure, command, start, start_button, PID, duty_cycl
 
 
 if __name__ == '__main__':
+    with open('requirements.txt') as f:
+        required = f.read().splitlines()
     app.run_server(debug=False)
