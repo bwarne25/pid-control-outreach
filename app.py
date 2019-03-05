@@ -432,8 +432,7 @@ def graph_data(temperature, figure, command, start, start_button, PID, duty_cycl
         temperatures = figure["data"][0]["y"]
         set_points = figure["data"][1]["y"]
         duty_cycles = figure["data"][2]["y"]
-        time_now = datetime.datetime.now().strftime("%H:%M:%S")
-        times.append(time_now)
+        times.append(time.time() - float(start))
         temperatures.append(temperature)
         set_points.append(PID)
         duty_cycles.append(float(duty_cycle))
