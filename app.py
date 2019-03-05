@@ -476,7 +476,7 @@ def graph_data(temperature, figure, command, start, start_button, PID, duty_cycl
             autosize=True,
             showlegend=True,
             xaxis={"title": "Time (s)", "autorange": True},
-            yaxis={"title": "Temperature(°C)", "autorange": True},
+            yaxis={"title": "Temperature (°C)", "autorange": True},
             # yaxis2={"title": "Duty Cycle", "autorange": True, "side": "right"},
             margin={"l": 70, "b": 100, "t": 0, "r": 25},
         ),
