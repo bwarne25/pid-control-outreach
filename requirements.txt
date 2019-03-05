@@ -8,3 +8,4 @@ numpy==1.16.1
 pandas==0.23.4
 DateTime==4.2
 scipy==1.1.0
+pyFirmata=1.0.3
