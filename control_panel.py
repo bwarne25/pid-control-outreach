@@ -70,9 +70,9 @@ layout = html.Div([
                             daq.NumericInput(
                                 id=setpoint_id,
                                 label="PID Setpoint (°C)",
-                                value=26,
-                                max=35,
-                                min=25,
+                                value=30,
+                                max=50,
+                                min=20,
                                 size=75,
                                 labelPosition="bottom",
                                 style={

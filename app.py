@@ -333,8 +333,9 @@ def dead_time_dev_gain_value(switch):
 )
 def dead_time(dead_time_on):
     if dead_time_on:
-        return 32
-    return 42
+        return 40
+    return 50
+
 
 @app.callback(
     Output(temperature_store_id, "children"),
