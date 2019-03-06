@@ -15,7 +15,6 @@ reset_button_id = "reset-button"
 
 download_button_id = "download-button"
 download_link_id = "download-link"
-csv_string_id = "raw-data"
 
 graph_data_id= "graph-data"
 

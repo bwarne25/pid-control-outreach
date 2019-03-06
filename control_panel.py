@@ -24,6 +24,7 @@ layout = html.Div([
                                     "paddingBottom": "25%",
                                 },
                                 n_clicks=0,
+                                disabled=False
                             ),
                             daq.StopButton(
                                 id=stop_button_id,
@@ -35,6 +36,7 @@ layout = html.Div([
                                     "paddingBottom": "25%",
                                 },
                                 n_clicks=0,
+                                disabled=True
                             ),
                             daq.StopButton(
                                 id=reset_button_id,
@@ -46,6 +48,7 @@ layout = html.Div([
                                     "paddingBottom": "25%",
                                 },
                                 n_clicks=0,
+                                disabled=True
                             ),
                         ],
                         className="four columns",

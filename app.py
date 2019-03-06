@@ -17,6 +17,7 @@ from dash.dependencies import State, Input, Output
 from constants import *
 import temperature_graph
 import control_panel
+from command_state import CommandState
 
 start_time = time.time()
 
@@ -28,36 +29,25 @@ server = app.server
 app.config.suppress_callback_exceptions = True
 connected = False
 
-current_DC = 0.0
+commandState = CommandState()
 
 try:
     time.sleep(2)
-    arduino_helper.update_duty_cycle(1.0)
+    arduino_helper.update_duty_cycle(0)
     connected = True
 except Exception as e:
     print(e)
 
-header = html.Div(
-    id="container",
-    style={"background-color": "#119DFF"},
-    children=[
-        html.H2("Arduino Temperature Controller"),
-    ],
-    className="banner",
-)
-if not connected:
-    header = html.Div(
-        id="container",
-        style={"background-color": "#119DFF"},
-        children=[
-            html.H2("Warning - not connected"),
-        ],
-        className="banner",
-    )
-
 app.layout = html.Div(
     [
-        header,
+        html.Div(
+            id="container",
+            style={"background-color": "#119DFF"},
+            children=[
+                html.H2("Arduino Temperature Controller"),
+            ],
+            className="banner",
+        ),
         html.Div(
             [
                 html.Div(
@@ -72,7 +62,7 @@ app.layout = html.Div(
                         html.Div(
                             [
                                 control_panel.layout
-                                ],
+                            ],
                             className="eight columns",
                             style={
                                 "border-radius": "5px",
@@ -186,14 +176,8 @@ app.layout = html.Div(
                         html.Div(id=stop_time_id),
                         html.Div(id=start_time_id),
                         html.Div(id=reset_time_id),
-                        html.Div(id="graph-data-send"),
                         html.Div(id=temperature_store_id),
                         html.Div(id=command_string),
-                        html.Div(id="thermotype-hold"),
-                        html.Div(id="filter-hold"),
-                        html.Div(id="pid-action"),
-                        html.Div(id="output-mode"),
-                        html.Div(id=csv_string_id),
                         dcc.Interval(
                             id=graph_interval_id, interval=100000, n_intervals=0
                         ),
@@ -215,78 +199,53 @@ app.layout = html.Div(
     },
 )
 
-# Buttons
-
+# Start Button
 @app.callback(
     Output(start_time_id, "children"),
     [Input(start_button_id, "n_clicks")]
 )
-def start_time(start):
-    if start > 0:
+def start_time(clicks):
+    if clicks > 0:
         return time.time()
     return 0
 
+@app.callback(
+    Output(stop_button_id, "disabled"),
+    [Input(start_button_id, "n_clicks")]
+)
+def start(clicks):
+    commandState.Start()
+    return False
 
 @app.callback(
-    Output(stop_time_id, "children"),
+    Output(reset_button_id, "disabled"),
     [Input(stop_button_id, "n_clicks")]
 )
-def stop_time(stop):
-    if stop > 0:
-        return time.time()
-    return 0
-
+def stop(clicks):
+    commandState.Stop()
+    return False
 
 @app.callback(
-    Output(download_link_id, "href"),
-    [Input(download_button_id, "n_clicks")],
-    [State(csv_string_id, "value")]
-)
-def download(clicks, csvString):
-    return "data:text/csv;charset=utf-8," + urllib.parse.quote(csvString)
-
-
-@app.callback(
-    Output(reset_time_id, "children"),
+    Output(start_button_id, "disabled"),
     [Input(reset_button_id, "n_clicks")]
 )
-def reset_time(reset):
-    return time.time()
-
-# Button Control Panel
-
-@app.callback(
-    Output(command_string, "children"),
-    [Input(start_time_id, "children"),
-     Input(stop_time_id, "children"),
-     Input(reset_time_id, "children")]
-)
-def command_string_button(
-    start_button,
-    stop_button,
-    reset_button
-):
-    master_command = {
-        "START": start_button,
-        "STOP": stop_button,
-        "RESET": reset_button,
-    }
-    recent_command = max(master_command, key=master_command.get)
-    return recent_command
-
+def reset(clicks):
+    commandState.Reset()
+    return False
 
 # Rate
 @app.callback(
     Output(graph_interval_id, "interval"),
-    [Input(command_string, "children"),
+    [Input(start_button_id, "n_clicks"),
      Input(refresh_rate_id, "value")],
 )
 def graph_control(command, rate):
-    if command == "START":
+    if commandState.current_command == "START":
         rate = int(rate) * 1000
         return rate
     else:
         return 3000
+
 
 @app.callback(
     Output(derivative_time_id, "value"),
@@ -339,65 +298,62 @@ def dead_time(dead_time_on):
 
 @app.callback(
     Output(temperature_store_id, "children"),
-    [Input(command_string, "children"),
+    [Input(start_button_id, "n_clicks"),
      Input(graph_interval_id, "n_intervals")],
 )
-def get_new_temperature(command, rate):
-    if command == "START":
+def get_new_temperature(start, rate):
         return arduino_helper.get_temperature()
+
 
 @app.callback(
     Output(temperature_display_id, "value"),
     [Input(graph_interval_id, "n_intervals")],
-    [State(temperature_store_id, "children"),
-     State(command_string, "children")],
+    [State(temperature_store_id, "children")],
 )
-def get_temperature_for_display(interval, temperature, command):
-    if command == "START":
+def get_temperature_for_display(interval, temperature):
+    if commandState.current_command == "START":
         temperature = "%.2f" % temperature
         return temperature
     else:
+        arduino_helper.update_duty_cycle(0)
         return "25.00"
+
 
 @app.callback(
     Output(duty_cycle_id, "value"),
-    [Input(graph_interval_id, "n_intervals")],
-    [State(refresh_rate_id, "value"),
-     State(duty_cycle_id, "value"),
+    [Input(graph_data_id, "figure")],
+    [State(duty_cycle_id, "value"),
      State(command_string, "children"),
      State(setpoint_id, "value"),
-     State(temperature_store_id, "children"),
      State(derivative_time_id, "value"),
      State(conroller_gain_id, "value"),
      State(integral_time_id, "value"),
-     State(graph_data_id, "figure")]
+     State(refresh_rate_id, "value")]
 )
-def get_new_dc(interval, rate, current_DC, command, PID_setpoint, temperature, dev_gain, pro_gain, int_gain, figure):
-    if command == "START":
-        try:
-            delta_time = figure["data"][0]["x"][-1] - figure["data"][0]["x"][-2]
+def get_new_dc(figure, current_DC, command, PID_setpoint, dev_gain, pro_gain, int_gain, rate):
+    if commandState.current_command == "START":
+        try: 
+            delta_time = float(figure["data"][0]["x"][-1]) - float(figure["data"][0]["x"][-2])
+            current_temperature = float(figure["data"][0]["y"][-1])
+            previous_temperature = float(figure["data"][0]["y"][-2])
+            previous_temperature2 = float(figure["data"][0]["y"][-3])       
         except:
             arduino_helper.update_duty_cycle(0)
             return "0.00"
 
-        EN_previous = PID_setpoint - temperature
-        EN_current = PID_setpoint - temperature
-
         PID_setpoint = float(PID_setpoint)
-        PID_setpoint = str(PID_setpoint)
-
         int_gain = float(int_gain)
         pro_gain = float(pro_gain)
-        
         current_DC = float(current_DC)
-        current_DC += pro_gain * (EN_current - EN_previous + (delta_time/int_gain) * EN_current)
         dev_gain = float(dev_gain)
 
-        try:
-            dev_adjustment = -pro_gain *dev_gain/delta_time * (figure["data"][0]["y"][-1] - 2 * figure["data"][0]["y"][-2] + figure["data"][0]["y"][-3])
-            current_DC += dev_adjustment
-        except:
-            pass
+        EN_current = PID_setpoint - current_temperature
+        EN_previous = PID_setpoint - previous_temperature
+
+        change_in_DC = pro_gain * (EN_current - EN_previous + (delta_time/int_gain) * EN_current - dev_gain / delta_time *
+                                   (current_temperature - 2 * previous_temperature + previous_temperature2))
+
+        current_DC += change_in_DC
 
         if current_DC > 1:
             current_DC = 1
@@ -410,58 +366,33 @@ def get_new_dc(interval, rate, current_DC, command, PID_setpoint, temperature, d
     return "0.00"
 
 @app.callback(
-    Output(csv_string_id, "value"),
-    [Input(temperature_store_id, "children")],
-    [State(csv_string_id, "value"),
-     State(command_string, "children"),
-     State(duty_cycle_id, "value"),
-     State(setpoint_id, "value"),
-     State(derivative_time_id, "value"),
-     State(conroller_gain_id, "value"),
-     State(integral_time_id, "value")],
-)
-def log_to_csv(temperature, data, command, duty_cycle, setpoint, dev_gain, pro_gain, int_gain):
-    if not data:
-        data = "time,temperature,duty cycle,set point,dev gain,controller gain,integral gain\n"
-    if command != "START":
-        return
-    time_now = datetime.datetime.now().strftime("%H:%M:%S")
-    new_row = f"{time_now},{temperature},{duty_cycle},{setpoint},{dev_gain},{pro_gain},{int_gain}"
-    data += new_row + "\n"
-
-
-@app.callback(
     Output(graph_data_id, "figure"),
     [Input(temperature_store_id, "children")],
     [State(graph_data_id, "figure"),
      State(command_string, "children"),
      State(start_time_id, "children"),
-     State(start_button_id, "n_clicks"),
-     State(setpoint_id, "value"),
-     State(duty_cycle_id, "value")],
+     State(setpoint_id, "value")],
 )
-def graph_data(temperature, figure, command, start, start_button, PID, duty_cycle):
-    print("command: ", command)
-    if command == "START":
+def graph_data(temperature, figure, command, start, PID):
+    if commandState.current_command == "START":
         times = figure["data"][0]["x"]
         temperatures = figure["data"][0]["y"]
         set_points = figure["data"][1]["y"]
-        duty_cycles = figure["data"][2]["y"]
-        times.append(time.time() - float(start))
+        if start == 0:
+            times.append(0)        
+        else:
+            times.append(time.time() - float(start))
         temperatures.append(temperature)
         set_points.append(PID)
-        duty_cycles.append(float(duty_cycle))
-    elif command == "RESET":
+    elif commandState.current_command == "RESET":
         times = []
         temperatures = []
         set_points = []
-        duty_cycles = []
         time_now = 0
     else:
         times = figure["data"][0]["x"]
         temperatures = figure["data"][0]["y"]
         set_points = figure["data"][1]["y"]
-        duty_cycles = figure["data"][2]["y"]
     return {
         "data": [
             go.Scatter(
@@ -477,22 +408,13 @@ def graph_data(temperature, figure, command, start, start_button, PID, duty_cycl
                 mode="lines",
                 marker={"size": 6},
                 name="Set Point (°C)",
-            ),
-            go.Scatter(
-                x=times,
-                y=duty_cycles,
-                mode="markers",
-                marker={"size": 6},
-                name="Duty Cycle",
-                visible=False
-            ),
+            )
         ],
         "layout": go.Layout(
             autosize=True,
             showlegend=True,
             xaxis={"title": "Time (s)", "autorange": True},
             yaxis={"title": "Temperature (°C)", "autorange": True},
-            # yaxis2={"title": "Duty Cycle", "autorange": True, "side": "right"},
             margin={"l": 70, "b": 100, "t": 0, "r": 25},
         ),
     }
