@@ -11,7 +11,7 @@ layout = html.Div(
         html.Div(
             [
                 html.H4(
-                    "Temperature vs. Time Graph",
+                    "Temperature vs. Time",
                     className=" three columns",
                     style={
                         "textAlign": "center",

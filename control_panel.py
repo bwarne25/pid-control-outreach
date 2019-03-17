@@ -73,7 +73,7 @@ layout = html.Div([
                             ),
                             daq.NumericInput(
                                 id=derivative_time_id,
-                                label="Derivative Time",
+                                label="Derivative Time (s)",
                                 value=0.1,
                                 max=1,
                                 min=0,
@@ -95,7 +95,7 @@ layout = html.Div([
                         [
                             daq.NumericInput(
                                 id=conroller_gain_id,
-                                label="Controller Gain",
+                                label="Controller Gain (DC/°C)",
                                 value=0.44,
                                 max=5,
                                 min=0,
@@ -111,7 +111,7 @@ layout = html.Div([
                             ),
                             daq.NumericInput(
                                 id=integral_time_id,
-                                label="Integral Time",
+                                label="Integral Time (s)",
                                 value=35.00,
                                 max=300,
                                 min=0,
