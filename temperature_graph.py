@@ -1,6 +1,7 @@
 from constants import *
 
 import dash
+import dash_daq as daq
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objs as go
@@ -17,6 +18,12 @@ layout = html.Div(
                         "width": "41%",
                     },
                 ),
+                 daq.StopButton(
+                                id=export_button_id,
+                                buttonText="Export",
+                                n_clicks=0,
+                                disabled=False
+                            ),
             ],
             className="row",
             style={
@@ -30,7 +37,7 @@ layout = html.Div(
         ),
         dcc.Graph(
             id=graph_data_id,
-            style={"height": "254px",
+            style={"height": "300px",
                    "marginBottom": "1%"},
             figure={
                 "data": [

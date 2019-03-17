@@ -17,6 +17,7 @@ from dash.dependencies import State, Input, Output
 from constants import *
 import temperature_graph
 import control_panel
+import settings_panel
 from command_state import CommandState
 import threading
 import webbrowser
@@ -73,7 +74,7 @@ app.layout = html.Div(
                                 "border-radius": "5px",
                                 "border-width": "5px",
                                 "border": "1px solid rgb(216, 216, 216)",
-                                "height": "434px",
+                                "height": "350px",
                             },
                         ),
                         html.Div(
@@ -170,11 +171,21 @@ app.layout = html.Div(
                                 "border-radius": "5px",
                                 "border-width": "5px",
                                 "border": "1px solid rgb(216, 216, 216)",
-                                "height": "436px",
+                                "height": "350px",
                             },
                         ),
                     ],
                     className="row",
+                ),
+                html.Div(
+                   [settings_panel.layout],
+                   className="twelve columns",
+                            style={
+                                "border-radius": "5px",
+                                "border-width": "5px",
+                                "border": "1px solid rgb(216, 216, 216)",
+                                "height": "200px",
+                            },
                 ),
                 html.Div(
                     [
@@ -189,8 +200,7 @@ app.layout = html.Div(
                         ),
                     ],
                     style={"visibility": "hidden"},
-                ),
-            ],
+                ), ],
             style={"padding": "0px 30px 0px 30px", },
         ),
     ],
@@ -200,12 +210,10 @@ app.layout = html.Div(
         "marginLeft": "auto",
         "marginRight": "auto",
         "width": "1180px",
-        "height": "955px",
+        "height": "1400px",
         "boxShadow": "0px 0px 5px 5px rgba(204,204,204,0.4)",
     },
 )
-
-# Start Button
 
 
 @app.callback(
@@ -244,16 +252,19 @@ def reset(clicks):
     commandState.Reset()
     return False
 
+
 @app.callback(
     Output(export_button_id, "disabled"),
     [Input(export_button_id, "n_clicks")],
     [State(graph_data_id, "figure")]
 )
 def export(clicks, figure):
-    data = [figure["data"][0]["x"], figure["data"][0]["y"], figure["data"][1]["y"], figure["data"][2]["y"], figure["data"][3]["y"], figure["data"][4]["y"]]
+    data = [figure["data"][0]["x"], figure["data"][0]["y"], figure["data"][1]["y"],
+            figure["data"][2]["y"], figure["data"][3]["y"], figure["data"][4]["y"]]
     df = pd.DataFrame(data).T
     df.columns = ['time', 'temp', 'dc', 'dev', 'pro', 'int']
-    file_name = 'pid_control_data_' + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + '.csv'
+    file_name = 'pid_control_data_' + \
+        datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + '.csv'
     df.to_csv(os.path.join('data', file_name))
     return False
 

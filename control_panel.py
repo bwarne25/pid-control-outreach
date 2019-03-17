@@ -1,5 +1,5 @@
 from constants import *
-
+import time
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -50,38 +50,12 @@ layout = html.Div([
                                 n_clicks=0,
                                 disabled=True
                             ),
-                            daq.StopButton(
-                                id=export_button_id,
-                                buttonText="Export",
-                                style={
-                                    "display": "flex",
-                                    "justify-content": "center",
-                                    "align-items": "center",
-                                    "paddingBottom": "15%",
-                                },
-                                n_clicks=0,
-                                disabled=False
-                            ),
                         ],
                         className="four columns",
                         style={"marginLeft": "5%"},
                     ),
                     html.Div(
                         [
-                            daq.NumericInput(
-                                id=refresh_rate_id,
-                                label="Refresh Rate (s)",
-                                labelPosition="bottom",
-                                size=75,
-                                value=3,
-                                max=10,
-                                style={
-                                    "display": "flex",
-                                    "justify-content": "center",
-                                    "align-items": "center",
-                                    "paddingBottom": "25%",
-                                },
-                            ),
                             daq.NumericInput(
                                 id=setpoint_id,
                                 label="PID Setpoint (°C)",
@@ -97,18 +71,22 @@ layout = html.Div([
                                     "paddingBottom": "15%",
                                 },
                             ),
-                            daq.BooleanSwitch(
-                                id=dead_time_switch_id,
-                                label="Dead Time",
+                            daq.NumericInput(
+                                id=derivative_time_id,
+                                label="Derivative Time",
+                                value=0.1,
+                                max=1,
+                                min=0,
+                                size=75,
                                 labelPosition="bottom",
-                                on=False,
+                                disabled=False,
                                 style={
                                     "display": "flex",
                                     "justify-content": "center",
                                     "align-items": "center",
                                     "paddingBottom": "15%",
                                 },
-                            ),
+                            )
                         ],
                         className="three columns",
                         style={"marginLeft": "5%"},
@@ -147,22 +125,7 @@ layout = html.Div([
                                     "paddingBottom": "15%",
                                 },
                             ),
-                            daq.NumericInput(
-                                id=derivative_time_id,
-                                label="Derivative Time",
-                                value=0.1,
-                                max=1,
-                                min=0,
-                                size=75,
-                                labelPosition="bottom",
-                                disabled=False,
-                                style={
-                                    "display": "flex",
-                                    "justify-content": "center",
-                                    "align-items": "center",
-                                    "paddingBottom": "15%",
-                                },
-                            )
+
                         ],
                        className="three columns", 
                        style={"marginLeft": "5%"},
@@ -173,3 +136,4 @@ layout = html.Div([
     )
 ]
 )
+
