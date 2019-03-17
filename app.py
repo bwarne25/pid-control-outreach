@@ -18,6 +18,8 @@ from constants import *
 import temperature_graph
 import control_panel
 from command_state import CommandState
+import threading
+import webbrowser
 
 start_time = time.time()
 
@@ -25,8 +27,11 @@ start_time = time.time()
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app.css.config.serve_locally = True
+app.scripts.config.serve_locally = True
 server = app.server
 app.config.suppress_callback_exceptions = True
+
 connected = False
 
 commandState = CommandState()
@@ -200,6 +205,8 @@ app.layout = html.Div(
 )
 
 # Start Button
+
+
 @app.callback(
     Output(start_time_id, "children"),
     [Input(start_button_id, "n_clicks")]
@@ -209,6 +216,7 @@ def start_time(clicks):
         return time.time()
     return 0
 
+
 @app.callback(
     Output(stop_button_id, "disabled"),
     [Input(start_button_id, "n_clicks")]
@@ -217,6 +225,7 @@ def start(clicks):
     commandState.Start()
     return False
 
+
 @app.callback(
     Output(reset_button_id, "disabled"),
     [Input(stop_button_id, "n_clicks")]
@@ -224,6 +233,7 @@ def start(clicks):
 def stop(clicks):
     commandState.Stop()
     return False
+
 
 @app.callback(
     Output(start_button_id, "disabled"),
@@ -234,6 +244,8 @@ def reset(clicks):
     return False
 
 # Rate
+
+
 @app.callback(
     Output(graph_interval_id, "interval"),
     [Input(start_button_id, "n_clicks"),
@@ -302,7 +314,7 @@ def dead_time(dead_time_on):
      Input(graph_interval_id, "n_intervals")],
 )
 def get_new_temperature(start, rate):
-        return arduino_helper.get_temperature()
+    return arduino_helper.get_temperature()
 
 
 @app.callback(
@@ -332,11 +344,12 @@ def get_temperature_for_display(interval, temperature):
 )
 def get_new_dc(figure, current_DC, command, PID_setpoint, dev_gain, pro_gain, int_gain, rate):
     if commandState.current_command == "START":
-        try: 
-            delta_time = float(figure["data"][0]["x"][-1]) - float(figure["data"][0]["x"][-2])
+        try:
+            delta_time = float(figure["data"][0]["x"]
+                               [-1]) - float(figure["data"][0]["x"][-2])
             current_temperature = float(figure["data"][0]["y"][-1])
             previous_temperature = float(figure["data"][0]["y"][-2])
-            previous_temperature2 = float(figure["data"][0]["y"][-3])       
+            previous_temperature2 = float(figure["data"][0]["y"][-3])
         except:
             arduino_helper.update_duty_cycle(0)
             return "0.00"
@@ -365,6 +378,7 @@ def get_new_dc(figure, current_DC, command, PID_setpoint, dev_gain, pro_gain, in
     arduino_helper.update_duty_cycle(0)
     return "0.00"
 
+
 @app.callback(
     Output(graph_data_id, "figure"),
     [Input(temperature_store_id, "children")],
@@ -379,7 +393,7 @@ def graph_data(temperature, figure, command, start, PID):
         temperatures = figure["data"][0]["y"]
         set_points = figure["data"][1]["y"]
         if start == 0:
-            times.append(0)        
+            times.append(0)
         else:
             times.append(time.time() - float(start))
         temperatures.append(temperature)
@@ -423,4 +437,9 @@ def graph_data(temperature, figure, command, start, PID):
 if __name__ == '__main__':
     with open('requirements.txt') as f:
         required = f.read().splitlines()
+
+    port = 8050
+    url = "http://127.0.0.1:{0}".format(port)
+    threading.Timer(2, lambda: webbrowser.open(url)).start()
+
     app.run_server(debug=False)
