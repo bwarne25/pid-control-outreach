@@ -7,7 +7,7 @@ import dash_daq as daq
 import plotly.graph_objs as go
 
 layout = html.Div([
-    html.H3("Control Panel", style={"textAlign": "center", "paddingBottom": "3%", }),
+    html.H3("Control Panel", className="card-title"),
     html.Div(
         [
             html.Div(
@@ -17,41 +17,26 @@ layout = html.Div([
                             daq.StopButton(
                                 id=start_button_id,
                                 buttonText="Start",
-                                style={
-                                    "display": "flex",
-                                    "justify-content": "center",
-                                    "align-items": "center",
-                                    "paddingBottom": "15%",
-                                },
+                                className="control-button",
                                 n_clicks=0,
                                 disabled=False
                             ),
                             daq.StopButton(
                                 id=stop_button_id,
                                 buttonText="Stop",
-                                style={
-                                    "display": "flex",
-                                    "justify-content": "center",
-                                    "align-items": "center",
-                                    "paddingBottom": "15%",
-                                },
+                                className="control-button",
                                 n_clicks=0,
                                 disabled=True
                             ),
                             daq.StopButton(
                                 id=reset_button_id,
                                 buttonText="Reset",
-                                style={
-                                    "display": "flex",
-                                    "justify-content": "center",
-                                    "align-items": "center",
-                                    "paddingBottom": "15%",
-                                },
+                                className="control-button",
                                 n_clicks=0,
                                 disabled=True
                             ),
                         ],
-                        className="four columns",
+                        # className="four columns",
                         style={"marginLeft": "5%"},
                     ),
                     html.Div(
@@ -88,7 +73,7 @@ layout = html.Div([
                                 },
                             )
                         ],
-                        className="three columns",
+                        # className="three columns",
                         style={"marginLeft": "5%"},
                     ),
                     html.Div(
@@ -127,7 +112,7 @@ layout = html.Div([
                             ),
 
                         ],
-                       className="three columns", 
+                    #    className="three columns", 
                        style={"marginLeft": "5%"},
                     )
                 ],

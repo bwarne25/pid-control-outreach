@@ -7,8 +7,7 @@ import dash_daq as daq
 import plotly.graph_objs as go
 
 layout = html.Div([
-    html.H3("Settings", style={
-            "textAlign": "center", "paddingBottom": "3%", }),
+    html.H3("Settings", className="card-title"),
     html.Div(
         [
             html.Div(
@@ -24,8 +23,8 @@ layout = html.Div([
                                 max=10,
                             ),
                         ],
-                        className="three columns", 
-                       style={"marginLeft": "5%"},
+                        # className="three columns",
+                        style={"marginLeft": "5%"},
                     ),
                     html.Div(
                         [
@@ -36,24 +35,23 @@ layout = html.Div([
                                 on=False,
                             ),
                         ],
-                        className="three columns", 
-                       style={"marginLeft": "5%"},
-                       ),
+                        # className="three columns",
+                        style={"marginLeft": "5%"},
+                    ),
                     html.Div(
                         [
                             dcc.Input(
                                 type='text',
                                 value='COM5')
                         ],
-                        className="three columns", 
-                       style={"marginLeft": "5%"},
+                        # className="three columns",
+                        style={"marginLeft": "5%"},
                     ),
                 ],
-                className="row",
+                # className="row",
                 style={"marginLeft": "5%"},
             ),
         ],
-        
     ),
 ]
 )

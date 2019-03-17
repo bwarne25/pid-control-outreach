@@ -18,6 +18,7 @@ from constants import *
 import temperature_graph
 import control_panel
 import settings_panel
+import led_display_panel
 from command_state import CommandState
 import threading
 import webbrowser
@@ -25,7 +26,7 @@ import webbrowser
 start_time = time.time()
 
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+external_stylesheets = []
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app.css.config.serve_locally = True
@@ -47,174 +48,69 @@ except Exception as e:
 app.layout = html.Div(
     [
         html.Div(
-            id="container",
-            style={"background-color": "#119DFF"},
+            id=header_id,
             children=[
                 html.H2("Arduino Temperature Controller"),
             ],
-            className="banner",
+            # className="banner",
         ),
         html.Div(
             [
                 html.Div(
                     [
-                        temperature_graph.layout
-                    ],
-                    className="row",
-                    style={"marginTop": "3%"},
-                ),
-                html.Div(
-                    [
                         html.Div(
                             [
-                                control_panel.layout
+                                temperature_graph.layout
                             ],
-                            className="eight columns",
-                            style={
-                                "border-radius": "5px",
-                                "border-width": "5px",
-                                "border": "1px solid rgb(216, 216, 216)",
-                                "height": "350px",
-                            },
+                            className="card graphg",
                         ),
                         html.Div(
                             [
-                                html.H3("Temperature", style={
-                                        "textAlign": "center"}),
                                 html.Div(
                                     [
-                                        daq.LEDDisplay(
-                                            id=temperature_display_id,
-                                            value="25.00",
-                                            style={
-                                                "display": "flex",
-                                                "justify-content": "center",
-                                                "align-items": "center",
-                                                "paddingTop": "1.7%",
-                                                "paddingLeft": "20.5%",
-                                                "marginLeft": "-7%",
-                                                "marginRight": "2%",
-                                            },
-                                            className="eight columns",
-                                            size=36,
-                                        ),
-                                        html.Div(
-                                            children=[
-                                                html.H5(
-                                                    "°C",
-                                                    style={
-                                                        "border-radius": "3px",
-                                                        "border-width": "5px",
-                                                        "border": "1px solid rgb(216, 216, 216)",
-                                                        "font-size": "47px",
-                                                        "color": "#2a3f5f",
-                                                        "display": "flex",
-                                                        "justify-content": "center",
-                                                        "align-items": "center",
-                                                        "width": "27%",
-                                                        "marginLeft": "3%",
-                                                    },
-                                                    className="four columns",
-                                                )
-                                            ],
-                                        ),
+                                        control_panel.layout
                                     ],
-                                    className="row",
-                                    style={"marginBottom": "2%"},
+                                    className="card controlg",
                                 ),
-                                html.H3("Duty Cycle", style={
-                                        "textAlign": "center"}),
                                 html.Div(
                                     [
-                                        daq.LEDDisplay(
-                                            id=duty_cycle_id,
-                                            value="0.00",
-                                            style={
-                                                "display": "flex",
-                                                "justify-content": "center",
-                                                "align-items": "center",
-                                                "paddingTop": "1.7%",
-                                                "paddingLeft": "20.5%",
-                                                "marginLeft": "-7%",
-                                                "marginRight": "2%",
-                                            },
-                                            className="eight columns",
-                                            size=36,
-                                        ),
-                                        html.Div(
-                                            children=[
-                                                html.H5(
-                                                    "DC",
-                                                    style={
-                                                        "border-radius": "3px",
-                                                        "border-width": "5px",
-                                                        "border": "1px solid rgb(216, 216, 216)",
-                                                        "font-size": "47px",
-                                                        "color": "#2a3f5f",
-                                                        "display": "flex",
-                                                        "justify-content": "center",
-                                                        "align-items": "center",
-                                                        "width": "27%",
-                                                        "marginLeft": "3%",
-                                                    },
-                                                    className="four columns",
-                                                )
-                                            ],
-                                        ),
+                                        led_display_panel.layout
                                     ],
-                                    className="row",
-                                    style={"marginBottom": "2%"},
+                                    className="card ledg",
                                 ),
                             ],
-                            className="four columns",
-                            style={
-                                "border-radius": "5px",
-                                "border-width": "5px",
-                                "border": "1px solid rgb(216, 216, 216)",
-                                "height": "350px",
-                            },
+                            # className="row",
                         ),
-                    ],
-                    className="row",
-                ),
-                html.Div(
-                   [settings_panel.layout],
-                   className="twelve columns",
-                            style={
-                                "border-radius": "5px",
-                                "border-width": "5px",
-                                "border": "1px solid rgb(216, 216, 216)",
-                                "height": "200px",
-                            },
-                ),
-                html.Div(
-                    [
-                        html.Div(id=stop_time_id),
-                        html.Div(id=start_time_id),
-                        html.Div(id=reset_time_id),
-                        html.Div(id=temperature_store_id),
-                        html.Div(id=command_string),
-                        html.Div(id=export_data_id),
-                        dcc.Interval(
-                            id=graph_interval_id, interval=100000, n_intervals=0
+                        html.Div([
+                            html.Div(
+                                [
+                                    settings_panel.layout
+                                ],
+                                className="card settingsg",
+                            ),
+                        ],
+                            # className="row",
                         ),
-                    ],
-                    style={"visibility": "hidden"},
-                ), ],
-            style={"padding": "0px 30px 0px 30px", },
-        ),
-    ],
+                        html.Div(
+                            [
+                                html.Div(id=stop_time_id),
+                                html.Div(id=start_time_id),
+                                html.Div(id=reset_time_id),
+                                html.Div(id=temperature_store_id),
+                                html.Div(id=command_string),
+                                html.Div(id=export_data_id),
+                                dcc.Interval(
+                                    id=graph_interval_id, interval=100000, n_intervals=0
+                                ),
+                            ],
+                            style={"visibility": "hidden"},
+                        ), ]
+                ),
+            ],
 
-    style={
-        "padding": "0px 10px 0px 10px",
-        "marginLeft": "auto",
-        "marginRight": "auto",
-        "width": "1180px",
-        "height": "1400px",
-        "boxShadow": "0px 0px 5px 5px rgba(204,204,204,0.4)",
-    },
+            className="wrapper")
+    ]
 )
-
 
 @app.callback(
     Output(start_time_id, "children"),

@@ -12,11 +12,7 @@ layout = html.Div(
             [
                 html.H4(
                     "Temperature vs. Time",
-                    className=" three columns",
-                    style={
-                        "textAlign": "center",
-                        "width": "41%",
-                    },
+                    # className=" three columns card-title",
                 ),
                  daq.StopButton(
                                 id=export_button_id,
@@ -25,20 +21,10 @@ layout = html.Div(
                                 disabled=False
                             ),
             ],
-            className="row",
-            style={
-                "marginTop": "1%",
-                "marginBottom": "2%",
-                "justify-content": "center",
-                "align-items": "center",
-                "display": "flex",
-                "position": "relative",
-            },
+            # className="row",
         ),
         dcc.Graph(
             id=graph_data_id,
-            style={"height": "300px",
-                   "marginBottom": "1%"},
             figure={
                 "data": [
                     go.Scatter(
@@ -90,11 +76,4 @@ layout = html.Div(
             },
         ),
     ],
-    className="twelve columns",
-    style={
-        "border-radius": "5px",
-        "border-width": "5px",
-        "border": "1px solid rgb(216, 216, 216)",
-        "marginBottom": "2%",
-    },
 )
