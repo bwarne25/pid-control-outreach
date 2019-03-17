@@ -47,6 +47,27 @@ layout = html.Div(
                         mode="lines",
                         marker={"size": 6},
                         name="Set Point (°C)",
+                    ),
+                    go.Scatter(
+                        x=[],
+                        y=[],
+                        mode="lines",
+                        marker={"size": 6},
+                        name="dev)",
+                    ),
+                    go.Scatter(
+                        x=[],
+                        y=[],
+                        mode="lines",
+                        marker={"size": 6},
+                        name="pro",
+                    ),
+                    go.Scatter(
+                        x=[],
+                        y=[],
+                        mode="lines",
+                        marker={"size": 6},
+                        name="int",
                     )
                 ],
                 "layout": go.Layout(

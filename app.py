@@ -3,7 +3,7 @@ from pyfirmata import Arduino, util, STRING_DATA
 import time
 import random
 import urllib.parse
-
+import os
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -183,6 +183,7 @@ app.layout = html.Div(
                         html.Div(id=reset_time_id),
                         html.Div(id=temperature_store_id),
                         html.Div(id=command_string),
+                        html.Div(id=export_data_id),
                         dcc.Interval(
                             id=graph_interval_id, interval=100000, n_intervals=0
                         ),
@@ -241,6 +242,19 @@ def stop(clicks):
 )
 def reset(clicks):
     commandState.Reset()
+    return False
+
+@app.callback(
+    Output(export_button_id, "disabled"),
+    [Input(export_button_id, "n_clicks")],
+    [State(graph_data_id, "figure")]
+)
+def export(clicks, figure):
+    data = [figure["data"][0]["x"], figure["data"][0]["y"], figure["data"][1]["y"], figure["data"][2]["y"], figure["data"][3]["y"], figure["data"][4]["y"]]
+    df = pd.DataFrame(data).T
+    df.columns = ['time', 'temp', 'dc', 'dev', 'pro', 'int']
+    file_name = 'pid_control_data_' + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + '.csv'
+    df.to_csv(os.path.join('data', file_name))
     return False
 
 # Rate
@@ -363,10 +377,10 @@ def get_new_dc(figure, current_DC, command, PID_setpoint, dev_gain, pro_gain, in
         EN_current = PID_setpoint - current_temperature
         EN_previous = PID_setpoint - previous_temperature
 
-        change_in_DC = pro_gain * (EN_current - EN_previous + (delta_time/int_gain) * EN_current - dev_gain / delta_time *
-                                   (current_temperature - 2 * previous_temperature + previous_temperature2))
-
-        current_DC += change_in_DC
+        if delta_time > 0 and int_gain > 0:
+            change_in_DC = pro_gain * (EN_current - EN_previous + (delta_time/int_gain) * EN_current - dev_gain / delta_time *
+                                       (current_temperature - 2 * previous_temperature + previous_temperature2))
+            current_DC += change_in_DC
 
         if current_DC > 1:
             current_DC = 1
@@ -385,28 +399,44 @@ def get_new_dc(figure, current_DC, command, PID_setpoint, dev_gain, pro_gain, in
     [State(graph_data_id, "figure"),
      State(command_string, "children"),
      State(start_time_id, "children"),
-     State(setpoint_id, "value")],
+     State(setpoint_id, "value"),
+     State(derivative_time_id, "value"),
+     State(conroller_gain_id, "value"),
+     State(integral_time_id, "value")],
 )
-def graph_data(temperature, figure, command, start, PID):
+def graph_data(temperature, figure, command, start, PID, dev_gain, pro_gain, int_gain):
     if commandState.current_command == "START":
         times = figure["data"][0]["x"]
         temperatures = figure["data"][0]["y"]
         set_points = figure["data"][1]["y"]
+        dev_gains = figure["data"][2]["y"]
+        pro_gains = figure["data"][3]["y"]
+        int_gains = figure["data"][4]["y"]
+
         if start == 0:
             times.append(0)
         else:
             times.append(time.time() - float(start))
         temperatures.append(temperature)
         set_points.append(PID)
+        dev_gains.append(dev_gain)
+        pro_gains.append(pro_gain)
+        int_gains.append(int_gain)
     elif commandState.current_command == "RESET":
         times = []
         temperatures = []
         set_points = []
+        dev_gains = []
+        pro_gains = []
+        int_gains = []
         time_now = 0
     else:
         times = figure["data"][0]["x"]
         temperatures = figure["data"][0]["y"]
         set_points = figure["data"][1]["y"]
+        dev_gains = figure["data"][2]["y"]
+        pro_gains = figure["data"][3]["y"]
+        int_gains = figure["data"][4]["y"]
     return {
         "data": [
             go.Scatter(
@@ -422,6 +452,30 @@ def graph_data(temperature, figure, command, start, PID):
                 mode="lines",
                 marker={"size": 6},
                 name="Set Point (°C)",
+            ),
+            go.Scatter(
+                x=times,
+                y=dev_gains,
+                mode="lines",
+                marker={"size": 6},
+                name="dev",
+                visible=False,
+            ),
+            go.Scatter(
+                x=times,
+                y=pro_gains,
+                mode="lines",
+                marker={"size": 6},
+                name="pro",
+                visible=False,
+            ),
+            go.Scatter(
+                x=times,
+                y=int_gains,
+                mode="lines",
+                marker={"size": 6},
+                name="int",
+                visible=False,
             )
         ],
         "layout": go.Layout(
@@ -435,8 +489,8 @@ def graph_data(temperature, figure, command, start, PID):
 
 
 if __name__ == '__main__':
-    with open('requirements.txt') as f:
-        required = f.read().splitlines()
+    # import pip
+    # pip.main(['install', '-r', 'requirements.txt'])
 
     port = 8050
     url = "http://127.0.0.1:{0}".format(port)

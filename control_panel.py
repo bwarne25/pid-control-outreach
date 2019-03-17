@@ -21,7 +21,7 @@ layout = html.Div([
                                     "display": "flex",
                                     "justify-content": "center",
                                     "align-items": "center",
-                                    "paddingBottom": "25%",
+                                    "paddingBottom": "15%",
                                 },
                                 n_clicks=0,
                                 disabled=False
@@ -33,7 +33,7 @@ layout = html.Div([
                                     "display": "flex",
                                     "justify-content": "center",
                                     "align-items": "center",
-                                    "paddingBottom": "25%",
+                                    "paddingBottom": "15%",
                                 },
                                 n_clicks=0,
                                 disabled=True
@@ -45,10 +45,22 @@ layout = html.Div([
                                     "display": "flex",
                                     "justify-content": "center",
                                     "align-items": "center",
-                                    "paddingBottom": "25%",
+                                    "paddingBottom": "15%",
                                 },
                                 n_clicks=0,
                                 disabled=True
+                            ),
+                            daq.StopButton(
+                                id=export_button_id,
+                                buttonText="Export",
+                                style={
+                                    "display": "flex",
+                                    "justify-content": "center",
+                                    "align-items": "center",
+                                    "paddingBottom": "15%",
+                                },
+                                n_clicks=0,
+                                disabled=False
                             ),
                         ],
                         className="four columns",
