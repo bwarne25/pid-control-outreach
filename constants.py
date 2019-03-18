@@ -12,6 +12,9 @@ command_string = "command-string"
 start_button_id = "start-button"
 stop_button_id = "stop-button"
 reset_button_id = "reset-button"
+export_button_id = "export-button"
+
+export_data_id = "export-data"
 
 download_button_id = "download-button"
 download_link_id = "download-link"
@@ -26,3 +29,5 @@ start_time_id = "start-timestamp"
 stop_time_id = "stop-timestamp"
 reset_time_id = "reset-timestamp"
 
+port_name_id = "port-name"
+is_connected = "is-connected"
