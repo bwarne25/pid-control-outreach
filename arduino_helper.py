@@ -1,9 +1,12 @@
 import time
 import numpy as np
-
 from pyfirmata import Arduino, util, STRING_DATA
 
-arduino = Arduino('COM5')
+try:
+    global arduino
+    arduino = Arduino('COM5')
+except:
+    arduino = None
 
 def reset_arduino(portName):
     global arduino
@@ -11,7 +14,8 @@ def reset_arduino(portName):
     global input_pin
     global output_pin
     try:
-        arduino.exit()
+        if arduino is not None:
+            arduino.exit()
         arduino = Arduino(portName)
         it = util.Iterator(arduino)
         it.start()
@@ -19,8 +23,7 @@ def reset_arduino(portName):
         input_pin = arduino.get_pin('a:0:i')
         output_pin = arduino.get_pin('d:6:p')
         return True
-    except Exception as e:
-        print(e)
+    except:
         return False
 
 reset_arduino('COM5')
