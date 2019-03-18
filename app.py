@@ -260,6 +260,8 @@ def reset(clicks):
     [State(graph_data_id, "figure")]
 )
 def export(clicks, figure):
+    if len(figure["data"][0]["x"]) == 0:
+        return False
     data = [figure["data"][0]["x"], figure["data"][0]["y"], figure["data"][1]["y"],
             figure["data"][2]["y"], figure["data"][3]["y"], figure["data"][4]["y"]]
     df = pd.DataFrame(data).T
@@ -441,7 +443,6 @@ def graph_data(temperature, figure, command, start, PID, dev_gain, pro_gain, int
         dev_gains = []
         pro_gains = []
         int_gains = []
-        time_now = 0
     else:
         times = figure["data"][0]["x"]
         temperatures = figure["data"][0]["y"]
