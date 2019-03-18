@@ -218,7 +218,7 @@ app.layout = html.Div(
 
 
 @app.callback(
-    Output(start_time_id, "children"),
+    Output(start_time_id, "value"),
     [Input(start_button_id, "n_clicks")]
 )
 def start_time(clicks):
@@ -338,7 +338,7 @@ def dead_time(dead_time_on):
 
 @app.callback(
     Output(temperature_store_id, "children"),
-    [Input(start_button_id, "n_clicks"),
+    [Input(start_time_id, "value"),
      Input(graph_interval_id, "n_intervals")],
 )
 def get_new_temperature(start, rate):
@@ -412,7 +412,7 @@ def get_new_dc(figure, current_DC, command, PID_setpoint, dev_gain, pro_gain, in
     [Input(temperature_store_id, "children")],
     [State(graph_data_id, "figure"),
      State(command_string, "children"),
-     State(start_time_id, "children"),
+     State(start_time_id, "value"),
      State(setpoint_id, "value"),
      State(derivative_time_id, "value"),
      State(conroller_gain_id, "value"),
@@ -427,15 +427,15 @@ def graph_data(temperature, figure, command, start, PID, dev_gain, pro_gain, int
         pro_gains = figure["data"][3]["y"]
         int_gains = figure["data"][4]["y"]
 
-        if start == 0:
+        if start == 0 or len(times) == 0:
             times.append(0)
-        else:
+        elif time.time() > float(start):
             times.append(time.time() - float(start))
-        temperatures.append(temperature)
-        set_points.append(PID)
-        dev_gains.append(dev_gain)
-        pro_gains.append(pro_gain)
-        int_gains.append(int_gain)
+            temperatures.append(temperature)
+            set_points.append(PID)
+            dev_gains.append(dev_gain)
+            pro_gains.append(pro_gain)
+            int_gains.append(int_gain)
     elif commandState.current_command == "RESET":
         times = []
         temperatures = []
@@ -502,14 +502,30 @@ def graph_data(temperature, figure, command, start, PID, dev_gain, pro_gain, int
 
 @app.callback(
     Output(is_connected, "color"),
-    [Input(port_name_id, "value")]
+    [Input(is_connected, "value")]
 )
-def port_name(port):
-    success = arduino_helper.reset_arduino(port) 
-    if success:
+def is_connected_color(value):
+    if value:
         return "#12b712"
     else:
         return "#ff0000"
+
+@app.callback(
+    Output(is_connected, "label"),
+    [Input(is_connected, "value")]
+)
+def is_connected_color(value):
+    if value:
+        return "Connected"
+    else:
+        return "Disconnected"
+        
+@app.callback(
+    Output(is_connected, "value"),
+    [Input(port_name_id, "value")]
+)
+def is_connected_value(port):
+    return arduino_helper.reset_arduino(port) 
 
 
 if __name__ == '__main__':
