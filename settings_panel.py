@@ -42,12 +42,21 @@ layout = html.Div([
                     html.Div(
                         [
                             dcc.Input(
+                                id=port_name_id,
                                 type='text',
-                                value='COM5')
+                                value='COM5'
+                                ),
+                            html.P("Port")
                         ],
                         className="three columns", 
                        style={"marginLeft": "5%"},
                     ),
+                    html.Div([daq.Indicator(
+                        id=is_connected,
+                        label="Connected",
+                        labelPosition="bottom",
+                        value=True
+                    )])
                 ],
                 className="row",
                 style={"marginLeft": "5%"},

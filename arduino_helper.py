@@ -3,18 +3,27 @@ import numpy as np
 
 from pyfirmata import Arduino, util, STRING_DATA
 
-portName = 'COM5'
+arduino = Arduino('COM5')
 
-try:
-    arduino = Arduino(portName)
-    it = util.Iterator(arduino)
-    it.start()
-    start_time = time.time()
-    input_pin = arduino.get_pin('a:0:i')
-    output_pin = arduino.get_pin('d:6:p')
-    switch_pin = arduino.get_pin('d:9:i')
-except:
-    pass
+def reset_arduino(portName):
+    global arduino
+    global start_time
+    global input_pin
+    global output_pin
+    try:
+        arduino.exit()
+        arduino = Arduino(portName)
+        it = util.Iterator(arduino)
+        it.start()
+        start_time = time.time()
+        input_pin = arduino.get_pin('a:0:i')
+        output_pin = arduino.get_pin('d:6:p')
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
+reset_arduino('COM5')
 
 
 def get_temperature():

@@ -74,7 +74,7 @@ app.layout = html.Div(
                                 "border-radius": "5px",
                                 "border-width": "5px",
                                 "border": "1px solid rgb(216, 216, 216)",
-                                "height": "350px",
+                                "height": "400px",
                             },
                         ),
                         html.Div(
@@ -171,11 +171,12 @@ app.layout = html.Div(
                                 "border-radius": "5px",
                                 "border-width": "5px",
                                 "border": "1px solid rgb(216, 216, 216)",
-                                "height": "350px",
+                                "height": "400px",
                             },
                         ),
                     ],
                     className="row",
+                    style={"marginBottom": "2%"},
                 ),
                 html.Div(
                    [settings_panel.layout],
@@ -184,7 +185,7 @@ app.layout = html.Div(
                                 "border-radius": "5px",
                                 "border-width": "5px",
                                 "border": "1px solid rgb(216, 216, 216)",
-                                "height": "200px",
+                                "height": "250px",
                             },
                 ),
                 html.Div(
@@ -209,8 +210,8 @@ app.layout = html.Div(
         "padding": "0px 10px 0px 10px",
         "marginLeft": "auto",
         "marginRight": "auto",
-        "width": "1180px",
-        "height": "1400px",
+        "width": "80%",
+        "height": "1300px",
         "boxShadow": "0px 0px 5px 5px rgba(204,204,204,0.4)",
     },
 )
@@ -298,7 +299,7 @@ def dead_time_dev_gain_value(switch):
     Output(conroller_gain_id, "value"),
     [Input(dead_time_switch_id, "on")]
 )
-def dead_time_dev_gain_value(switch):
+def dead_time_pro_value(switch):
     if switch:
         return 0.26
     return 0.44
@@ -308,7 +309,7 @@ def dead_time_dev_gain_value(switch):
     Output(integral_time_id, "value"),
     [Input(dead_time_switch_id, "on")]
 )
-def dead_time_dev_gain_value(switch):
+def dead_time_int_value(switch):
     if switch:
         return 100
     return 35
@@ -497,6 +498,17 @@ def graph_data(temperature, figure, command, start, PID, dev_gain, pro_gain, int
             margin={"l": 70, "b": 100, "t": 0, "r": 25},
         ),
     }
+
+@app.callback(
+    Output(is_connected, "color"),
+    [Input(port_name_id, "value")]
+)
+def port_name(port):
+    success = arduino_helper.reset_arduino(port) 
+    if success:
+        return "#12b712"
+    else:
+        return "#ff0000"
 
 
 if __name__ == '__main__':

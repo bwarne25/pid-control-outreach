@@ -29,3 +29,5 @@ start_time_id = "start-timestamp"
 stop_time_id = "stop-timestamp"
 reset_time_id = "reset-timestamp"
 
+port_name_id = "port-name"
+is_connected = "is-connected"
